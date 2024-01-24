@@ -3,6 +3,7 @@
 --  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
+vim.o.tabstop = 2
 
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    https://github.com/folke/lazy.nvim
@@ -164,12 +165,30 @@ require('lazy').setup({
     -- See `:help lualine.txt`
     opts = {
       options = {
-        icons_enabled = false,
-        theme = 'onedark',
+        icons_enabled = true,
+        theme = 'tokyonight',
         component_separators = '|',
         section_separators = '',
       },
     },
+    config = function(self, opts)
+      require('lualine').setup({
+        options = opts.options,
+        sections = {
+          lualine_x = { "copilot", "encoding", "fileformat", "filetype" },
+        },
+        winbar = {
+          lualine_c = {
+            {
+              "navic",
+              color_correction = nil,
+              navic_opts = nil,
+            },
+          },
+        },
+      })
+    end,
+    dependencies = { "SmiteshP/nvim-navic" },
   },
 
   {
@@ -215,6 +234,7 @@ require('lazy').setup({
   },
   require 'kickstart.plugins.debug',
   require 'kickstart.plugins.autoformat',
+  { import = 'custom.plugins' }
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
@@ -458,6 +478,10 @@ local on_attach = function(_, bufnr)
   --
   -- In this case, we create a function that lets us more easily define mappings specific
   -- for LSP related items. It sets the mode, buffer and description for us each time.
+  local navic = require('nvim-navic')
+  if _.server_capabilities.documentSymbolProvider then
+    navic.attach(_, bufnr)
+  end
   local nmap = function(keys, func, desc)
     if desc then
       desc = 'LSP: ' .. desc
@@ -617,6 +641,7 @@ cmp.setup {
     { name = 'nvim_lsp' },
     { name = 'luasnip' },
     { name = 'path' },
+    { name = 'copilot' },
   },
 }
 
