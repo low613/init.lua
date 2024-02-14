@@ -4,6 +4,8 @@ return {
   dependencies = {
     'nvim-telescope/telescope-file-browser.nvim',
     'nvim-lua/plenary.nvim',
+    'nvim-telescope/telescope-ui-select.nvim',
+    'debugloop/telescope-undo.nvim',
     -- Fuzzy Finder Algorithm which requires local dependencies to be built.
     -- Only load if `make` is available. Make sure you have the system
     -- requirements installed.
@@ -15,12 +17,17 @@ return {
       cond = function()
         return vim.fn.executable 'make' == 1
       end,
-
     },
   },
   config = function()
     require('telescope').setup {
       defaults = {
+        layout_config = {
+          vertical = {
+            width = 0.75,
+          },
+        },
+        layout_strategy = 'vertical',
         mappings = {
           i = {
             ['<C-u>'] = false,
@@ -28,11 +35,25 @@ return {
           },
         },
       },
+      extensions = {
+        ['ui-select'] = {
+          require('telescope.themes').get_dropdown {},
+        },
+        undo = {
+          side_by_side = true,
+          layout_strategy = 'vertical',
+          layout_config = {
+            preview_height = 0.8,
+          },
+        },
+      },
     }
 
     -- Enable telescope fzf native, if installed
     pcall(require('telescope').load_extension, 'fzf')
-    require('telescope').load_extension("file_browser")
+    require('telescope').load_extension 'file_browser'
+    require('telescope').load_extension 'ui-select'
+    require('telescope').load_extension 'undo'
     -- Telescope live_grep in git root
     -- Function to find the git root directory based on the current buffer's path
     local function find_git_root()
@@ -49,8 +70,7 @@ return {
       end
 
       -- Find the Git root directory from the current file's path
-      local git_root = vim.fn.systemlist('git -C ' .. vim.fn.escape(current_dir, ' ') .. ' rev-parse --show-toplevel')
-          [1]
+      local git_root = vim.fn.systemlist('git -C ' .. vim.fn.escape(current_dir, ' ') .. ' rev-parse --show-toplevel')[1]
       if vim.v.shell_error ~= 0 then
         print 'Not a git repository. Searching on current working directory'
         return cwd
@@ -71,10 +91,8 @@ return {
     vim.api.nvim_create_user_command('LiveGrepGitRoot', live_grep_git_root, {})
 
     -- See `:help telescope.builtin`
-    vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles,
-      { desc = '[?] Find recently opened files' })
-    vim.keymap.set('n', '<leader><space>', require('telescope.builtin').buffers,
-      { desc = '[ ] Find existing buffers' })
+    vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles, { desc = '[?] Find recently opened files' })
+    vim.keymap.set('n', '<leader><space>', require('telescope.builtin').buffers, { desc = '[ ] Find existing buffers' })
     vim.keymap.set('n', '<leader>/', function()
       -- You can pass additional configuration to telescope to change theme, layout, etc.
       require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
@@ -99,7 +117,9 @@ return {
     vim.keymap.set('n', '<leader>sG', ':LiveGrepGitRoot<cr>', { desc = '[S]earch by [G]rep on Git Root' })
     vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
     vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = '[S]earch [R]esume' })
-    vim.keymap.set('n', '<leader>fb', require 'telescope'.extensions.file_browser.file_browser,
-      { desc = '[F]ile [B]rowser' })
+    vim.keymap.set('n', '<leader>fb', require('telescope').extensions.file_browser.file_browser, { desc = '[F]ile [B]rowser' })
+    vim.keymap.set('n', '<leader>ws', require('telescope.builtin').lsp_workspace_symbols, { desc = '[W]orkspace [S]ymbols' })
+    vim.keymap.set('n', '<leader>ds', require('telescope.builtin').lsp_document_symbols, { desc = '[D]ocument [S]ymbols' })
+    vim.keymap.set('n', '<leader>u', '<cmd>Telescope undo<cr>')
   end,
 }

@@ -33,6 +33,8 @@ return {
         null_ls.builtins.formatting.gofumpt,
         null_ls.builtins.formatting.terraform_fmt,
         null_ls.builtins.formatting.prismaFmt,
+        null_ls.builtins.formatting.shfmt,
+        null_ls.builtins.code_actions.shellcheck,
       },
     }
   end,

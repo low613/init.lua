@@ -13,10 +13,12 @@ vim.o.breakindent = true
 vim.o.swapfile = false
 -- Save undo history
 vim.o.undofile = true
-
+vim.o.wrap = false
 -- Case-insensitive searching UNLESS \C or capital in search
 vim.o.ignorecase = true
 vim.o.smartcase = true
+vim.o.spelllang = 'en_au'
+vim.o.spell = true
 
 vim.wo.signcolumn = 'yes'
 
@@ -57,3 +59,7 @@ vim.keymap.set('n', '<C-d>', '<C-d>zz')
 vim.keymap.set('n', '<C-u>', '<C-u>zz')
 vim.keymap.set('n', 'n', 'nzzzv')
 vim.keymap.set('n', 'N', 'Nzzzv')
+
+vim.keymap.set({ 'n', 'v' }, '<leader>y', [["+y]])
+vim.keymap.set('n', '<leader>Y', [["+Y]])
+vim.keymap.set('n', '<C-f>', '<cmd>silent !tmux neww tmux-sessionizer<CR>')
